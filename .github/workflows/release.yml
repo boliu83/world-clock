@@ -46,20 +46,8 @@ jobs:
       - name: Package executable
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force -Path release | Out-Null
-          Copy-Item build/WorldClock.exe release/WorldClock.exe
-          Compress-Archive -Path release/WorldClock.exe -DestinationPath WorldClock-${env:VERSION}-windows-x64.zip -Force
-
-      - name: Package source
-        shell: pwsh
-        run: |
-          $sourceRoot = "WorldClock-${env:VERSION}-source"
-          New-Item -ItemType Directory -Force -Path $sourceRoot | Out-Null
-          $exclude = @('.git', 'build', 'release', '.video-review')
-          Get-ChildItem -Force | Where-Object { $exclude -notcontains $_.Name } | ForEach-Object {
-            Copy-Item $_.FullName -Destination $sourceRoot -Recurse -Force
-          }
-          Compress-Archive -Path $sourceRoot -DestinationPath WorldClock-${env:VERSION}-source.zip -Force
+          Copy-Item build/WorldClock.exe WorldClock.exe
+          Compress-Archive -Path WorldClock.exe -DestinationPath WorldClock-${env:VERSION}-windows-x64.zip -Force
 
       - name: Publish release
         shell: pwsh
@@ -70,19 +58,19 @@ jobs:
           World Clock ${env:VERSION}
 
           Assets:
-          - WorldClock-${env:VERSION}-windows-x64.zip: compiled executable
-          - WorldClock-${env:VERSION}-source.zip: source snapshot
+          - WorldClock.exe: compiled executable (run as-is, no installer)
+          - WorldClock-${env:VERSION}-windows-x64.zip: zipped executable
           "@
           gh release view $env:VERSION *> $null
           if ($LASTEXITCODE -ne 0) {
             gh release create $env:VERSION `
+              WorldClock.exe `
               WorldClock-${env:VERSION}-windows-x64.zip `
-              WorldClock-${env:VERSION}-source.zip `
               --title "World Clock ${env:VERSION}" `
               --notes $notes
           } else {
             gh release upload $env:VERSION `
+              WorldClock.exe `
               WorldClock-${env:VERSION}-windows-x64.zip `
-              WorldClock-${env:VERSION}-source.zip `
               --clobber
           }
