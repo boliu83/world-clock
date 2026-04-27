@@ -3,6 +3,7 @@
 #include "settings.h"
 #include "popup.h"
 #include <shellapi.h>
+#include <algorithm>
 #include <string>
 
 namespace tray {
@@ -57,7 +58,9 @@ void RemoveIcon() {
 
 void ShowContextMenu(HWND hwnd, POINT pt) {
     HMENU m = CreatePopupMenu();
+    HMENU heightMenu = CreatePopupMenu();
     auto& s = settings::Get();
+    int popupRows = std::clamp(s.popupHeightRows, 0, 20);
     AppendMenuW(m, MF_STRING, IDM_SHOW, L"Show world clock");
     AppendMenuW(m, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(m, MF_STRING | (s.use24h ? MF_CHECKED : 0),
@@ -68,6 +71,16 @@ void ShowContextMenu(HWND hwnd, POINT pt) {
                 IDM_ALWAYS_ON_TOP, L"Always on top");
     AppendMenuW(m, MF_STRING | (s.runAtStartup ? MF_CHECKED : 0),
                 IDM_RUN_AT_STARTUP, L"Run at startup");
+    AppendMenuW(m, MF_SEPARATOR, 0, nullptr);
+    AppendMenuW(heightMenu, MF_STRING | (popupRows == 0 ? MF_CHECKED : 0),
+                IDM_POPUP_HEIGHT_BASE, L"0 rows (auto)");
+    for (int rows = 1; rows <= 20; ++rows) {
+        wchar_t label[32];
+        swprintf_s(label, L"%d %s", rows, rows == 1 ? L"row" : L"rows");
+        AppendMenuW(heightMenu, MF_STRING | (popupRows == rows ? MF_CHECKED : 0),
+                    IDM_POPUP_HEIGHT_BASE + rows, label);
+    }
+    AppendMenuW(m, MF_POPUP, reinterpret_cast<UINT_PTR>(heightMenu), L"Popup height");
     AppendMenuW(m, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(m, MF_STRING, IDM_RESET_TIME, L"Reset to current time");
     AppendMenuW(m, MF_SEPARATOR, 0, nullptr);
@@ -156,6 +169,12 @@ bool GetIconRect(RECT& outScreenRect) {
 
 void HandleCommand(HWND hwnd, UINT cmdId) {
     auto& s = settings::Get();
+    if (cmdId >= IDM_POPUP_HEIGHT_BASE && cmdId <= IDM_POPUP_HEIGHT_MAX) {
+        s.popupHeightRows = static_cast<int>(cmdId - IDM_POPUP_HEIGHT_BASE);
+        settings::Save();
+        popup::Refresh();
+        return;
+    }
     switch (cmdId) {
         case IDM_SHOW:
             popup::Show();

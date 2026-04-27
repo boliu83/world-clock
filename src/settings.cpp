@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <algorithm>
 
 namespace settings {
 
@@ -85,6 +86,20 @@ bool ReadBool(const std::string& s, size_t& i, bool& out) {
     return false;
 }
 
+bool ReadInt(const std::string& s, size_t& i, int& out) {
+    SkipWs(s, i);
+    bool neg = false;
+    if (i < s.size() && s[i] == '-') { neg = true; ++i; }
+    if (i >= s.size() || s[i] < '0' || s[i] > '9') return false;
+    int value = 0;
+    while (i < s.size() && s[i] >= '0' && s[i] <= '9') {
+        value = value * 10 + (s[i] - '0');
+        ++i;
+    }
+    out = neg ? -value : value;
+    return true;
+}
+
 void Parse(const std::string& s, Data& d) {
     size_t i = 0;
     SkipWs(s, i);
@@ -120,16 +135,21 @@ void Parse(const std::string& s, Data& d) {
                 else if (key == "alwaysOnTop")  d.alwaysOnTop = b;
                 else if (key == "runAtStartup") d.runAtStartup = b;
             } else {
-                // skip value to next comma or end
-                int depth = 0;
-                while (i < s.size()) {
-                    char c = s[i];
-                    if (c == '{' || c == '[') ++depth;
-                    else if (c == '}' || c == ']') {
-                        if (depth == 0) break;
-                        --depth;
-                    } else if (c == ',' && depth == 0) break;
-                    ++i;
+                int n = 0;
+                if (ReadInt(s, i, n)) {
+                    if (key == "popupHeightRows") d.popupHeightRows = std::clamp(n, 0, 20);
+                } else {
+                    // skip value to next comma or end
+                    int depth = 0;
+                    while (i < s.size()) {
+                        char c = s[i];
+                        if (c == '{' || c == '[') ++depth;
+                        else if (c == '}' || c == ']') {
+                            if (depth == 0) break;
+                            --depth;
+                        } else if (c == ',' && depth == 0) break;
+                        ++i;
+                    }
                 }
             }
         }
@@ -142,6 +162,7 @@ void ApplyDefaults(Data& d) {
     if (d.zones.empty()) {
         d.zones = {"America/Los_Angeles", "America/New_York", "Europe/London", "Asia/Tokyo"};
     }
+    d.popupHeightRows = std::clamp(d.popupHeightRows, 0, 20);
 }
 
 } // namespace
@@ -173,7 +194,8 @@ void Save() {
     out << "  \"use24h\": "       << (gData.use24h       ? "true" : "false") << ",\n";
     out << "  \"showSeconds\": "  << (gData.showSeconds  ? "true" : "false") << ",\n";
     out << "  \"alwaysOnTop\": "  << (gData.alwaysOnTop  ? "true" : "false") << ",\n";
-    out << "  \"runAtStartup\": " << (gData.runAtStartup ? "true" : "false") << "\n";
+    out << "  \"runAtStartup\": " << (gData.runAtStartup ? "true" : "false") << ",\n";
+    out << "  \"popupHeightRows\": " << std::clamp(gData.popupHeightRows, 0, 20) << "\n";
     out << "}\n";
 }
 

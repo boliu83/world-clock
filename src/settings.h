@@ -10,6 +10,7 @@ struct Data {
     bool showSeconds = false;
     bool alwaysOnTop = false;
     bool runAtStartup = false;
+    int popupHeightRows = 0;          // 0 = automatic, 1-20 = fixed row count
 };
 
 Data& Get();

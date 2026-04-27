@@ -116,8 +116,13 @@ void ApplyDwmChrome(HWND hwnd) {
 void PositionPopup(HWND hwnd) {
     auto& s = settings::Get();
     int w = PopupWidthPx();
-    int rowCount = std::min<int>(static_cast<int>(s.zones.size()), theme::kPopupMaxRows);
-    if (rowCount < 1) rowCount = 1;
+    int rowCount = s.popupHeightRows;
+    if (rowCount == 0) {
+        rowCount = std::min<int>(static_cast<int>(s.zones.size()), theme::kPopupMaxRows);
+        if (rowCount < 1) rowCount = 1;
+    } else {
+        rowCount = std::clamp(rowCount, 0, 20);
+    }
     int h = HeaderHeightPx() + rowCount * RowHeightPx() + FooterHeightPx();
 
     POINT anchor{};
@@ -132,6 +137,9 @@ void PositionPopup(HWND hwnd) {
     HMONITOR mon = MonitorFromPoint(anchor, MONITOR_DEFAULTTONEAREST);
     MONITORINFO mi{ sizeof(mi) };
     GetMonitorInfoW(mon, &mi);
+
+    int maxH = mi.rcWork.bottom - mi.rcWork.top - 16;
+    if (h > maxH) h = maxH;
 
     int x = anchor.x - w / 2;
     int y = anchor.y - h - theme::Scale(theme::kSpace2, gDpi);

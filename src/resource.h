@@ -20,6 +20,8 @@
 #define IDM_TOGGLE_FORMAT       40005
 #define IDM_TOGGLE_SECONDS      40006
 #define IDM_RESET_TIME          40007
+#define IDM_POPUP_HEIGHT_BASE   40100
+#define IDM_POPUP_HEIGHT_MAX    40120
 
 // Popup child control IDs
 #define IDC_LIST                50001
