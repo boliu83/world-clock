@@ -1,0 +1,31 @@
+#include <winres.h>
+#include "resource.h"
+
+// App / tray icon.
+IDI_TRAY ICON "../assets/app.ico"
+
+// Version info (minimal)
+1 VERSIONINFO
+FILEVERSION    1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS         0x40004L
+FILETYPE       0x1L
+{
+  BLOCK "StringFileInfo"
+  {
+    BLOCK "040904b0"
+    {
+      VALUE "CompanyName",      "WorldClock"
+      VALUE "FileDescription",  "World Clock tray utility"
+      VALUE "FileVersion",      "1.0.0.0"
+      VALUE "InternalName",     "WorldClock"
+      VALUE "OriginalFilename", "WorldClock.exe"
+      VALUE "ProductName",      "WorldClock"
+      VALUE "ProductVersion",   "1.0.0.0"
+    }
+  }
+  BLOCK "VarFileInfo"
+  {
+    VALUE "Translation", 0x0409, 0x04B0
+  }
+}
