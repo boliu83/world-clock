@@ -47,6 +47,7 @@ jobs:
         shell: pwsh
         run: |
           Copy-Item build/WorldClock.exe WorldClock.exe
+          Compress-Archive -Path WorldClock.exe -DestinationPath WorldClock-${env:VERSION}-windows-x64.zip -Force
 
       - name: Publish release
         shell: pwsh
@@ -57,16 +58,16 @@ jobs:
           World Clock ${env:VERSION}
 
           Assets:
-          - WorldClock.exe: compiled executable (run as-is, no installer)
+          - WorldClock-${env:VERSION}-windows-x64.zip: zipped executable
           "@
           gh release view $env:VERSION *> $null
           if ($LASTEXITCODE -ne 0) {
             gh release create $env:VERSION `
-              WorldClock.exe `
+              WorldClock-${env:VERSION}-windows-x64.zip `
               --title "World Clock ${env:VERSION}" `
               --notes $notes
           } else {
             gh release upload $env:VERSION `
-              WorldClock.exe `
+              WorldClock-${env:VERSION}-windows-x64.zip `
               --clobber
           }
