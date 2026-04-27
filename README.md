@@ -1,5 +1,8 @@
 # World Clock
 
+[![CodeQL](https://github.com/boliu83/world-clock/actions/workflows/codeql.yml/badge.svg)](https://github.com/boliu83/world-clock/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/boliu83/world-clock/badge)](https://scorecard.dev/viewer/?uri=github.com/boliu83/world-clock)
+
 ![World Clock app screenshot](app_large.png)
 
 World Clock is a small Windows tray utility for keeping an eye on multiple time zones. It opens from the system tray, shows local times at a glance, and lets you preview a chosen time across all saved locations.
